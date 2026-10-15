@@ -2,6 +2,7 @@ node_modules/
 .test-build/
 main.js
 preview.js
+preview-ui.js
 *.png
 .env
 .env.*
