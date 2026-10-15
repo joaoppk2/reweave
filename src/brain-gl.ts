@@ -40,6 +40,17 @@ const CONFIG:Record<GLMode,Config> = {
 const GRAPH_OPTIONS = { bundles:0, strands:7, pathPts:80, shellAlpha:1, branches:0, motes:500, moteDepth:.9, beadSteps:3, grayMix:0, signalTone:null, cells:0, fissure:false, fiberAlpha:.14, cellAlpha:.3, dotSize:2.0, graph:true, graphNodes:300, graphReach:.27 };
 const CASCADE_OPTIONS = { ...GRAPH_OPTIONS, motes:0, cascade:true, cascades:14, cycle:22, depthMin:.88, depthSpan:.06, pathBase:.3, maxHops:6, dendrites:4, dendLen:.7, bokeh:false };
 
+// Os 3D somam luz (brilho aditivo): cores puras do gráfico, como #ff0000 ou #00ff00, estouram e viram néon quando se cruzam.
+// Mantém o matiz de cada região, mas limita a saturação e a luminosidade para ficarem suaves e legíveis.
+export function soften(c:RGB, saturation = .72, lightness = .5):RGB {
+  const [r, g, b] = c, max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (d < 1e-6) return [lightness, lightness, lightness];
+  let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + 360) % 360;
+  const q = lightness < .5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation, p = 2 * lightness - q;
+  const f = (t:number) => { t = (t + 360) % 360 / 360; return t < 1/6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2/3 ? p + (q - p) * (2/3 - t) * 6 : p; };
+  return [f(h + 120), f(h), f(h - 120)];
+}
 export function parseColor(css:string, fallback:RGB):RGB {
   const s = css.trim();
   let m = /^#([0-9a-f]{6})$/i.exec(s);
@@ -238,7 +249,7 @@ export class BrainGL implements Renderer {
       let best = -1, most = 0;
       for (const [group, count] of area) if (count > most) { most = count; best = group; }
       const color = this.data.groups[best]?.color;
-      return color ? parseColor(color, this.fallback) : this.fallback;
+      return color ? soften(parseColor(color, this.fallback)) : this.fallback;
     });
     const key = this.mode + JSON.stringify(next);
     this.legacyColors = next;
@@ -253,7 +264,7 @@ export class BrainGL implements Renderer {
     this.positions.clear();
     for (const n of this.notes) {
       const fallback = n.colorVariable === '--graph-node-tag' ? this.palette.tag : n.colorVariable === '--graph-node-attachment' ? this.palette.attachment : n.colorVariable === '--graph-node' ? this.palette.node : n.color || this.palette.node;
-      this.colors.set(n.path, parseColor(this.rules.find(r => r.test(n))?.color || fallback, this.fallback));
+      this.colors.set(n.path, soften(parseColor(this.rules.find(r => r.test(n))?.color || fallback, this.fallback), .7, .56));
       this.positions.set(n.path, inward(pt(n.u, n.v, n.side), .965));
     }
     this.rebuildReal();

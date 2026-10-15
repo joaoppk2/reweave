@@ -4,13 +4,16 @@ import { defaultSettings } from './settings';
 import { fillLegacy } from './brain-regions';
 import type { BrainGraph, BrainNote } from './brain-data';
 
-const palette = ['#4a90e2', '#e28045', '#7cbd6a'];
-const groups = fillLegacy(palette.map((color, i) => ({ name: ['Azul', 'Laranja', 'Verde'][i], color, text: '', legacy: null, notes: 0 })));
+// ?palette=vault usa os 7 grupos de cor do vault do autor (cores puras), para testar o visual com cores saturadas.
+const useVault = new URLSearchParams(location.search).get('palette') === 'vault';
+const palette = useVault ? ['#ff0000', '#0000ff', '#00ff00', '#ff3f00', '#7f00ff', '#ffff00', '#ff7f00'] : ['#4a90e2', '#e28045', '#7cbd6a'];
+const names = useVault ? ['Pausados', 'Fatia de Ciência', 'Corte de Caixa', 'JStreet Wear', 'Ferramentas de vídeo', 'Cortado e Servido', 'Segundo Cérebro'] : ['Azul', 'Laranja', 'Verde'];
+const groups = fillLegacy(palette.map((color, i) => ({ name:names[i], color, text:'', legacy:null, notes:0 })));
 let seed = 12345;
 const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
 const nodes:BrainNote[] = [];
 for (let i = 0; i < 160; i++) {
-  const region = i % 9 === 8 ? -1 : i % 3;
+  const region = i % 9 === 8 ? -1 : i % palette.length;
   if (region >= 0) groups[region].notes++;
   nodes.push({ path:`Nota ${i}.md`, title:`Nota ${i}`, mtimeMs:Date.now() - rand() * 864e5 * 10, region, type:'note', color:region >= 0 ? groups[region].color : '', colorVariable:region >= 0 ? undefined : '--graph-node', tags:[], frontmatter:undefined });
 }
