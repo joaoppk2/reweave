@@ -36,7 +36,7 @@ export class BrainUI {
     const stage=el('section',host,'','reweave-stage'),canvas=el('canvas',stage);canvas.setAttribute('aria-label','Cérebro de notas e vínculos');
     this.canvas2d=canvas;this.glCanvas=el('canvas',stage);this.glCanvas.setAttribute('aria-label','Cérebro de notas e vínculos (visualizador 3D)');this.glCanvas.hidden=true;
     this.top=new BrainCanvas(canvas,choose,hover);
-    this.caption=el('p',stage,'Arraste para mover · Shift + arraste para girar · Role para aproximar','reweave-caption');
+    this.caption=el('p',stage,'Arraste para mover · Clique com a roda e arraste para girar · Role a roda para aproximar','reweave-caption');
     const aside=el('aside',host),toggle=el('button',aside,'','clickable-icon reweave-panel-toggle'),body=el('div',aside);
     toggle.type='button';body.id='reweave-panel-'+crypto.randomUUID();toggle.setAttribute('aria-controls',body.id);
     const updateToggle=()=>{const label=body.hidden?'Abrir painel':'Recolher painel';toggle.setAttribute('aria-label',label);toggle.setAttribute('aria-expanded',String(!body.hidden));toggle.title=label;setIcon(toggle,body.hidden?'settings':'x');};
@@ -44,7 +44,7 @@ export class BrainUI {
     const section=(name:string,open=false)=>{const d=el('details',body);d.open=open;el('summary',d,name);return el('div',d,'','reweave-section');};
     const visual=section('Visualizador',true);
     for(const [id,text] of [['top','Vista de cima'],['fibers','Anatômico (fibras)'],['network','Anatômico (rede)']] as const){const b=el('button',visual,text);b.type='button';b.setAttribute('aria-pressed',String(id==='top'));b.onclick=()=>this.setMode(id);this.modeButtons.push([id,b]);}
-    el('small',visual,'Compare os visualizadores. Forças e texto das notas valem só na vista de cima; nos 3D, a roda gira e Ctrl + roda aproxima.');
+    el('small',visual,'Compare os visualizadores. Forças e texto das notas valem só na vista de cima. Em todos: role a roda para aproximar e clique com a roda e arraste para girar.');
     const groups=section('Grupos');this.regions=el('div',groups,'','reweave-regions');
     el('button',groups,'Ver tudo').onclick=()=>{this.selected=-1;this.renderer.selectRegion(-1);this.refresh();};
     el('h3',groups,'Grupos de cor');el('small',groups,'A primeira expressão correspondente define a cor. Salvo nas configurações do plugin.');
@@ -91,7 +91,7 @@ export class BrainUI {
     this.canvas2d.hidden=mode!=='top';this.glCanvas.hidden=mode==='top';
     if(this.gl&&mode!=='top')this.gl.setMode(mode);
     for(const [id,b] of this.modeButtons)b.setAttribute('aria-pressed',String(id===mode));
-    this.caption.textContent=mode==='top'?'Arraste para mover · Shift + arraste para girar · Role para aproximar':'Arraste para mover · Shift + arraste para inclinar · Role para girar · Ctrl + role para aproximar';
+    this.caption.textContent='Arraste para mover · Clique com a roda e arraste para girar · Role a roda para aproximar';
     const r=this.renderer;
     r.setColorRules(this.settings.colorRules);r.setFilter(n=>this.matches(n));r.setDisplay(this.displayState);
     if(r.isAnimating()!==this.animating)r.toggleAnimation();

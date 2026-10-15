@@ -90,7 +90,7 @@ export class BrainGL implements Renderer {
   private fallback:RGB = [.6, .6, .6];
   private display = { nodeSize:1, linkWidth:1 };
   private forces:ForceSettings = { ...defaultForces };
-  private pointer:{ id:number; x:number; y:number; startX:number; startY:number; moved:boolean }|null = null;
+  private pointer:{ id:number; x:number; y:number; startX:number; startY:number; moved:boolean; rotate:boolean }|null = null;
   private readonly resizeObserver:ResizeObserver;
   private readonly themeObserver:MutationObserver;
   private readonly motion:MediaQueryList;
@@ -116,6 +116,8 @@ export class BrainGL implements Renderer {
     this.listen('pointercancel', this.pointerCancel);
     this.listen('lostpointercapture', this.pointerCancel);
     this.listen('wheel', this.wheel, { passive:false });
+    this.listen('contextmenu', event => event.preventDefault());
+    this.listen('mousedown', event => { if (event.button === 1) event.preventDefault(); });   // evita o autoscroll do clique com a roda
     this.listen('keydown', event => { if (event.key === 'Escape') { this.chosen = null; this.rebuildReal(); this.redraw(); } });
     const lost = (event:Event) => { event.preventDefault(); this.onLost(); };
     canvas.addEventListener('webglcontextlost', lost);
@@ -373,8 +375,9 @@ export class BrainGL implements Renderer {
     return best?.n;
   }
   private pointerDown = (event:PointerEvent):void => {
-    if (this.pointer || event.button !== 0) return;
-    this.pointer = { id:event.pointerId, x:event.clientX, y:event.clientY, startX:event.clientX, startY:event.clientY, moved:false };
+    if (this.pointer || event.button > 2) return;
+    if (event.button !== 0) event.preventDefault();
+    this.pointer = { id:event.pointerId, x:event.clientX, y:event.clientY, startX:event.clientX, startY:event.clientY, moved:false, rotate:event.button !== 0 };
     this.canvas.setPointerCapture(event.pointerId);
   };
   private pointerMove = (event:PointerEvent):void => {
@@ -383,7 +386,7 @@ export class BrainGL implements Renderer {
       if (p.id !== event.pointerId) return;
       const dx = event.clientX - p.x, dy = event.clientY - p.y;
       if (Math.hypot(event.clientX - p.startX, event.clientY - p.startY) > 6) p.moved = true;
-      if (event.shiftKey) { this.cam.yaw += dx * .008; this.cam.pitch = Math.max(-1.4, Math.min(1.4, this.cam.pitch + dy * .008)); }
+      if (p.rotate) { this.cam.yaw += dx * .008; this.cam.pitch = Math.max(-1.4, Math.min(1.4, this.cam.pitch + dy * .008)); }
       else { this.cam.panX += dx / this.height * 2; this.cam.panY -= dy / this.height * 2; }
       p.x = event.clientX; p.y = event.clientY; this.canvas.title = ''; this.redraw();
     } else {
@@ -394,7 +397,7 @@ export class BrainGL implements Renderer {
   private pointerUp = (event:PointerEvent):void => {
     const start = this.pointer; if (!start || start.id !== event.pointerId) return;
     this.pointer = null; if (this.canvas.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId);
-    if (start.moved || Math.hypot(event.clientX - start.startX, event.clientY - start.startY) > 6) return;
+    if (start.rotate || start.moved || Math.hypot(event.clientX - start.startX, event.clientY - start.startY) > 6) return;
     const rect = this.canvas.getBoundingClientRect(), note = this.hit(event.clientX - rect.left, event.clientY - rect.top); if (!note) return;
     this.chosen = note.path; this.rebuildReal(); this.redraw();
     this.choose(note, () => {});
@@ -403,12 +406,11 @@ export class BrainGL implements Renderer {
     if (this.pointer?.id === event.pointerId) { this.pointer = null; if (this.canvas.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId); }
     this.canvas.title = '';
   };
+  // Roda para a frente aproxima, para trás afasta; girar é clicar com a roda (ou o botão direito) e arrastar. Nenhum atalho com Shift ou Ctrl.
   private wheel = (event:WheelEvent):void => {
     event.preventDefault();
-    const k = event.deltaMode === 1 ? 16 : 1, dx = event.deltaX * k, dy = event.deltaY * k;
-    if (event.ctrlKey || event.metaKey) this.cam.zoom = Math.max(.4, Math.min(3, this.cam.zoom * Math.exp(-dy * .001)));   // Ctrl + roda ou pinça do touchpad
-    else if (event.shiftKey) this.cam.pitch = Math.max(-1.4, Math.min(1.4, this.cam.pitch + (dy || dx) * .004));            // Shift + roda inclina
-    else this.cam.yaw += (dy + dx) * .004;                                                                                   // roda gira o cérebro
+    const k = event.deltaMode === 1 ? 16 : 1;
+    this.cam.zoom = Math.max(.4, Math.min(3, this.cam.zoom * Math.exp(-event.deltaY * k * .001)));
     this.redraw();
   };
 }

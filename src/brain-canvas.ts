@@ -33,7 +33,7 @@ export class BrainCanvas {
   private destroyed=false;
   private time=0;
   private prev=0;
-  private pointer:{id:number;x:number;y:number;startX:number;startY:number;moved:boolean}|null=null;
+  private pointer:{id:number;x:number;y:number;startX:number;startY:number;moved:boolean;rotate:boolean}|null=null;
   private display={arrows:false,labelThreshold:2.5,nodeSize:1,linkWidth:1};
   private forces:ForceSettings={...defaultForces};
   private layout:{start:number;from:Vec3[];to:Vec3[]}|null=null;
@@ -61,6 +61,8 @@ export class BrainCanvas {
     this.listen('pointercancel',this.pointerCancel);
     this.listen('lostpointercapture',this.pointerCancel);
     this.listen('wheel',this.wheel,{passive:false});
+    this.listen('contextmenu',event=>event.preventDefault());
+    this.listen('mousedown',event=>{if(event.button===1)event.preventDefault();});   // evita o autoscroll do clique com a roda
     this.listen('keydown',event=>{if(event.key==='Escape'){this.chosen=null;canvas.title='';this.redraw();}});
     this.resize();
     this.resolveColors();
@@ -221,22 +223,23 @@ export class BrainCanvas {
     return this.visible.map(n=>({n,p:this.project(n)})).filter(a=>Math.hypot(a.p.x-x,a.p.y-y)<Math.max(12,6*this.display.nodeSize)).sort((a,b)=>b.p.z-a.p.z)[0]?.n;
   }
   private pointerDown=(event:PointerEvent):void=>{
-    if(this.pointer||event.button!==0)return;
-    this.pointer={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false};
+    if(this.pointer||event.button>2)return;
+    if(event.button!==0)event.preventDefault();
+    this.pointer={id:event.pointerId,x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false,rotate:event.button!==0};
     this.canvas.setPointerCapture(event.pointerId);
   };
   private pointerMove=(event:PointerEvent):void=>{
     const p=this.pointer;
     if(p){if(p.id!==event.pointerId)return;const dx=event.clientX-p.x,dy=event.clientY-p.y;
       if(Math.hypot(event.clientX-p.startX,event.clientY-p.startY)>6)p.moved=true;
-      if(event.shiftKey){this.camera.angle+=dx*.007;this.camera.tilt=Math.max(-1,Math.min(1,this.camera.tilt+dy*.005));}else{this.camera.panX+=dx;this.camera.panY+=dy;}
+      if(p.rotate){this.camera.angle+=dx*.007;this.camera.tilt=Math.max(-1,Math.min(1,this.camera.tilt+dy*.005));}else{this.camera.panX+=dx;this.camera.panY+=dy;}
       p.x=event.clientX;p.y=event.clientY;this.canvas.title='';this.redraw();
     }else{const rect=this.canvas.getBoundingClientRect(),note=this.hit(event.clientX-rect.left,event.clientY-rect.top);this.canvas.title='';if(note&&note.type!=='tag')this.hover(note,event);}
   };
   private pointerUp=(event:PointerEvent):void=>{
     const start=this.pointer;if(!start||start.id!==event.pointerId)return;
     this.pointer=null;if(this.canvas.hasPointerCapture(event.pointerId))this.canvas.releasePointerCapture(event.pointerId);
-    if(start.moved||Math.hypot(event.clientX-start.startX,event.clientY-start.startY)>6)return;
+    if(start.rotate||start.moved||Math.hypot(event.clientX-start.startX,event.clientY-start.startY)>6)return;
     const rect=this.canvas.getBoundingClientRect(),note=this.hit(event.clientX-rect.left,event.clientY-rect.top);if(!note)return;
     this.choose(note,()=>{});
   };

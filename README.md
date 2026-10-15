@@ -10,10 +10,10 @@ Gravados a partir do plugin com notas **fictícias**, a 60 quadros por segundo. 
 
 | | |
 | :--- | :--- |
-| [![Visão geral](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/) | **[Visão geral (47 s)](https://joaoppk2.github.io/reweave/)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, inclinação, busca e grupos. |
+| [![Visão geral](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/) | **[Visão geral (53 s)](https://joaoppk2.github.io/reweave/)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, busca e grupos. |
 | [![Vista de cima](docs/images/vista-de-cima.jpg)](https://joaoppk2.github.io/reweave/#vista-de-cima) | **[Vista de cima (14 s)](https://joaoppk2.github.io/reweave/#vista-de-cima)** |
-| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](https://joaoppk2.github.io/reweave/#anatomico-fibras) | **[Anatômico (fibras) (12 s)](https://joaoppk2.github.io/reweave/#anatomico-fibras)** |
-| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/#anatomico-rede) | **[Anatômico (rede) (13 s)](https://joaoppk2.github.io/reweave/#anatomico-rede)** |
+| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](https://joaoppk2.github.io/reweave/#anatomico-fibras) | **[Anatômico (fibras) (10 s)](https://joaoppk2.github.io/reweave/#anatomico-fibras)** |
+| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/#anatomico-rede) | **[Anatômico (rede) (12 s)](https://joaoppk2.github.io/reweave/#anatomico-rede)** |
 
 ## Visualizadores
 
@@ -35,13 +35,16 @@ Escolha em **Visualizador**, no painel da direita. Os três usam as mesmas notas
 
 ### Controles
 
-| | Vista de cima | Anatômico (fibras / rede) |
-| :--- | :--- | :--- |
-| Arrastar | mover | mover |
-| Shift + arrastar | girar | girar |
-| Roda do mouse | aproximar | **girar** |
-| Ctrl + roda (ou pinça do touchpad) | | aproximar |
-| Shift + roda | | inclinar |
+Em todos os visualizadores, só com o mouse e sem teclas de atalho:
+
+| | |
+| :--- | :--- |
+| **Roda do mouse para a frente / para trás** | aproximar / afastar |
+| **Clique com a roda e arraste** (esquerda, direita, cima ou baixo) | girar o cérebro |
+| Arrastar com o botão esquerdo | mover |
+| Clique numa nota | abrir a nota |
+
+O botão direito do mouse arrastando também gira, para quem não tem clique na roda (por exemplo, no touchpad).
 
 ## Instalação
 
@@ -96,7 +99,7 @@ An Obsidian plugin that turns your notes and the links between them into a **liv
 
 ## Videos (60 fps)
 
-Recorded from the plugin with **fictional** notes at 60 frames per second. **[Watch them on the videos page](https://joaoppk2.github.io/reweave/)**: overview (47 s), top view, anatomical (fibers) and anatomical (network). The `.mp4` files are also in `docs/videos` for download.
+Recorded from the plugin with **fictional** notes at 60 frames per second. **[Watch them on the videos page](https://joaoppk2.github.io/reweave/)**: overview (53 s), top view, anatomical (fibers) and anatomical (network). The `.mp4` files are also in `docs/videos` for download.
 
 ## Visualizers
 
@@ -115,7 +118,7 @@ Pick one under **Visualizador** (side panel). All three use the same notes, link
 - **Forces** (top view): center, repel, link and distance, with a button that copies your Obsidian graph values.
 - **Click** opens the note; **hover** shows Obsidian's page preview. Your chosen visualizer is remembered.
 
-Controls in the 3D visualizers: drag moves, Shift+drag rotates, **mouse wheel rotates**, Ctrl+wheel (or trackpad pinch) zooms, Shift+wheel tilts.
+Controls, in every visualizer and with the mouse only (no modifier keys): **scroll the wheel forward / backward** to zoom in / out, **press the wheel and drag** (left, right, up or down) to rotate, drag with the left button to move, click a note to open it. Dragging with the right button also rotates, for trackpads without a middle click.
 
 ## Install
 
