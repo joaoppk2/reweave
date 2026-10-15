@@ -6,14 +6,14 @@ Plugin do Obsidian que transforma suas notas e os vínculos entre elas em um **c
 
 ## Vídeos (60 fps)
 
-Gravados a partir do plugin com notas **fictícias**, a 60 quadros por segundo. Clique na imagem para assistir.
+Gravados a partir do plugin com notas **fictícias**, a 60 quadros por segundo. **[Assistir na página dos vídeos](https://joaoppk2.github.io/reweave/)** (clique nas imagens). Os arquivos `.mp4` também estão em `docs/videos` para baixar.
 
 | | |
 | :--- | :--- |
-| [![Visão geral](docs/images/anatomico-rede.jpg)](docs/videos/reweave-visao-geral-60fps.mp4) | **[Visão geral (47 s)](docs/videos/reweave-visao-geral-60fps.mp4)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, inclinação, busca e grupos. |
-| [![Vista de cima](docs/images/vista-de-cima.jpg)](docs/videos/vista-de-cima-60fps.mp4) | **[Vista de cima (14 s)](docs/videos/vista-de-cima-60fps.mp4)** |
-| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](docs/videos/anatomico-fibras-60fps.mp4) | **[Anatômico (fibras) (12 s)](docs/videos/anatomico-fibras-60fps.mp4)** |
-| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](docs/videos/anatomico-rede-60fps.mp4) | **[Anatômico (rede) (13 s)](docs/videos/anatomico-rede-60fps.mp4)** |
+| [![Visão geral](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/) | **[Visão geral (47 s)](https://joaoppk2.github.io/reweave/)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, inclinação, busca e grupos. |
+| [![Vista de cima](docs/images/vista-de-cima.jpg)](https://joaoppk2.github.io/reweave/#vista-de-cima) | **[Vista de cima (14 s)](https://joaoppk2.github.io/reweave/#vista-de-cima)** |
+| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](https://joaoppk2.github.io/reweave/#anatomico-fibras) | **[Anatômico (fibras) (12 s)](https://joaoppk2.github.io/reweave/#anatomico-fibras)** |
+| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/#anatomico-rede) | **[Anatômico (rede) (13 s)](https://joaoppk2.github.io/reweave/#anatomico-rede)** |
 
 ## Visualizadores
 
@@ -96,7 +96,7 @@ An Obsidian plugin that turns your notes and the links between them into a **liv
 
 ## Videos (60 fps)
 
-Recorded from the plugin with **fictional** notes at 60 frames per second: [overview (47 s)](docs/videos/reweave-visao-geral-60fps.mp4), [Top view](docs/videos/vista-de-cima-60fps.mp4), [Anatomical (fibers)](docs/videos/anatomico-fibras-60fps.mp4), [Anatomical (network)](docs/videos/anatomico-rede-60fps.mp4).
+Recorded from the plugin with **fictional** notes at 60 frames per second. **[Watch them on the videos page](https://joaoppk2.github.io/reweave/)**: overview (47 s), top view, anatomical (fibers) and anatomical (network). The `.mp4` files are also in `docs/videos` for download.
 
 ## Visualizers
 

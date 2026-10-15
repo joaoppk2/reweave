@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reweave · vídeos de demonstração</title>
+<style>
+:root{color-scheme:dark;--bg:#1c1c1c;--panel:#262626;--text:#dcddde;--muted:#9a9a9a;--accent:#7b6cd9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:32px 16px 64px}
+h1{margin:0 0 4px;font-size:30px}h2{margin:40px 0 8px;font-size:20px}
+p{color:var(--muted);margin:6px 0 14px}
+a{color:var(--accent)}
+video{display:block;width:100%;height:auto;background:#000;border-radius:10px;border:1px solid #3a3a3a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:var(--panel);border:1px solid #3a3a3a;border-radius:12px;padding:14px}
+.card h3{margin:0 0 4px;font-size:16px}.card p{margin:0 0 10px;font-size:14px}
+nav a{margin-right:16px}
+</style>
+</head>
+<body>
+<main>
+<h1>Reweave</h1>
+<p>Plugin do Obsidian que transforma suas notas e vínculos em um cérebro 3D vivo · <span lang="en">An Obsidian plugin that turns your notes and links into a living 3D brain.</span></p>
+<nav><a href="https://github.com/joaoppk2/reweave">Repositório</a><a href="https://github.com/joaoppk2/reweave/releases/latest">Baixar o plugin</a><a href="https://github.com/joaoppk2/reweave#readme">Instruções</a></nav>
+
+<h2>Visão geral (47 s)</h2>
+<p>Os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, inclinação, busca e grupos. Vídeos a 60 fps, gravados no plugin com notas fictícias. <span lang="en">Overview of all three visualizers and every feature, 60 fps, fictional notes.</span></p>
+<video controls preload="metadata" poster="images/anatomico-rede.jpg" src="videos/reweave-visao-geral-60fps.mp4"></video>
+
+<h2>Um vídeo por visualizador</h2>
+<div class="grid">
+  <section class="card" id="vista-de-cima"><h3>Vista de cima</h3><p>Canvas 2D, com texto das notas, setas e forças. <span lang="en">Top view.</span></p>
+    <video controls preload="metadata" poster="images/vista-de-cima.jpg" src="videos/vista-de-cima-60fps.mp4"></video></section>
+  <section class="card" id="anatomico-fibras"><h3>Anatômico (fibras)</h3><p>Visão lateral em WebGL, com feixes de fibras. <span lang="en">Anatomical (fibers).</span></p>
+    <video controls preload="metadata" poster="images/anatomico-fibras.jpg" src="videos/anatomico-fibras-60fps.mp4"></video></section>
+  <section class="card" id="anatomico-rede"><h3>Anatômico (rede)</h3><p>O impulso corre pelos vínculos reais das notas. <span lang="en">Anatomical (network).</span></p>
+    <video controls preload="metadata" poster="images/anatomico-rede.jpg" src="videos/anatomico-rede-60fps.mp4"></video></section>
+</div>
+</main>
+</body>
+</html>
