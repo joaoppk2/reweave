@@ -4,16 +4,11 @@
 
 Plugin do Obsidian que transforma suas notas e os vínculos entre elas em um **cérebro 3D vivo**: cada nota é um ponto, cada vínculo é um fio, e o gráfico de cores do Obsidian vira as regiões do cérebro. Nada do seu vault é alterado e nada sai do seu computador.
 
+[![Reweave (Fio Vivo): o impulso corre pelos vínculos reais das suas notas](docs/images/reweave-preview.webp)](https://joaoppk2.github.io/reweave/)
+
 ## Vídeos (60 fps)
 
-Gravados a partir do plugin com notas **fictícias**, a 60 quadros por segundo. **[Assistir na página dos vídeos](https://joaoppk2.github.io/reweave/)** (clique nas imagens). Os arquivos `.mp4` também estão em `docs/videos` para baixar.
-
-| | |
-| :--- | :--- |
-| [![Visão geral](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/) | **[Visão geral (53 s)](https://joaoppk2.github.io/reweave/)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, busca e grupos. |
-| [![Vista de cima](docs/images/vista-de-cima.jpg)](https://joaoppk2.github.io/reweave/#vista-de-cima) | **[Vista de cima (14 s)](https://joaoppk2.github.io/reweave/#vista-de-cima)** |
-| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](https://joaoppk2.github.io/reweave/#anatomico-fibras) | **[Anatômico (fibras) (10 s)](https://joaoppk2.github.io/reweave/#anatomico-fibras)** |
-| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](https://joaoppk2.github.io/reweave/#anatomico-rede) | **[Anatômico (rede) (12 s)](https://joaoppk2.github.io/reweave/#anatomico-rede)** |
+**[Assistir na página dos vídeos](https://joaoppk2.github.io/reweave/)**: [visão geral (53 s)](https://joaoppk2.github.io/reweave/), [vista de cima](https://joaoppk2.github.io/reweave/#vista-de-cima), [anatômico (fibras)](https://joaoppk2.github.io/reweave/#anatomico-fibras) e [anatômico (rede)](https://joaoppk2.github.io/reweave/#anatomico-rede). Gravados a 60 quadros por segundo, com notas **fictícias**. Os arquivos `.mp4` também estão em `docs/videos`, para baixar.
 
 ## Visualizadores
 
