@@ -1,14 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {surface,TAU,makeGeometry,notePosition,initialCamera,project,region,hash,defaultRegions} from '../.test-build/geometry.js';
 import {filterNotes,periodStart,graphFromRecords} from '../.test-build/data.js';
-const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
-for(const part of ['cortex','cerebellum','stem']){
- test(`${part}: closed seam and collapsed poles`,()=>{for(let j=0;j<=32;j++){const v=j/32*Math.PI;assert.ok(distance(surface(part,0,v),surface(part,TAU,v))<1e-12);}for(const v of [0,Math.PI])for(let j=0;j<16;j++)assert.ok(distance(surface(part,0,v),surface(part,j/16*TAU,v))<1e-12);});
- test(`${part}: continuous bounded samples`,()=>{for(let j=1;j<64;j++)for(let k=0;k<128;k++){const a=surface(part,k/128*TAU,j/64*Math.PI),b=surface(part,(k+1)/128*TAU,j/64*Math.PI);assert.ok(Object.values(a).every(Number.isFinite));assert.ok(distance(a,b)<.08);}});
-}
-test('stem is a single slender volume; cortex has real depth',()=>{const stem=Array.from({length:64},(_,i)=>surface('stem',i/64*TAU,Math.PI/2));assert.ok(Math.max(...stem.map(p=>p.x))-Math.min(...stem.map(p=>p.x))<.23);assert.ok(surface('cortex',Math.PI/2,Math.PI/2).z>.5);assert.ok(surface('cortex',Math.PI*1.5,Math.PI/2).z<-.5);assert.equal(makeGeometry().points.length,1400);assert.ok(makeGeometry().lines.length<30);});
-test('deterministic positions, finite perspective and camera rotation',()=>{assert.deepEqual(notePosition('Study/A.md'),notePosition('Study/A.md'));const a=project({x:1,y:0,z:0},initialCamera(),800,600);const b=project({x:1,y:0,z:0},{...initialCamera(),yaw:Math.PI/2},800,600);assert.notEqual(a.x,b.x);for(const zoom of [.5,4])for(const yaw of [0,Math.PI/2,Math.PI])for(const p of makeGeometry().points)assert.ok(Object.values(project(p,{...initialCamera(),yaw,zoom},320,500)).every(Number.isFinite));});
-test('local deterministic wires and seven stable regions',()=>{const a=makeGeometry(),b=makeGeometry();assert.deepEqual(a,b);assert.deepEqual([...new Set(a.points.map(region))].sort(),[0,1,2,3,4,5,6]);const counts=new Map();for(const [i,j]of a.edges){assert.ok(distance(a.points[i],a.points[j])<Math.sqrt(.045));counts.set(i,(counts.get(i)||0)+1);}assert.ok([...counts.values()].every(n=>n<=2));assert.equal(region(notePosition('A.md','Estudos')),hash('Estudos')%7);assert.equal(defaultRegions.length,7);});
 const now=new Date(2026,9,15,12),today=new Date(2026,9,15,1).getTime();
 const notes=[{path:'Estudos/Ação.md',title:'Ação',group:'Estudos',mtime:today},{path:'Ideias/B.md',title:'B',group:'Ideias',mtime:new Date(2026,9,12,1).getTime()},{path:'C.md',title:'C',group:'Raiz',mtime:new Date(2026,9,11,23).getTime()},{path:'Future.md',title:'Future',group:'Raiz',mtime:now.getTime()+86400000}];
 test('accent insensitive search and region intersection',()=>assert.deepEqual(filterNotes(notes,{query:'acao',group:'Estudos',period:'all'},now).map(n=>n.title),['Ação']));

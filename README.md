@@ -73,10 +73,10 @@ npm ci
 npm run typecheck
 npm test                          # compila e roda os testes
 npm run build                     # gera main.js
-npm run build && npm run preview  # prévia no navegador: http://127.0.0.1:5187/ui
+npm run build && npm run preview  # prévia no navegador: http://127.0.0.1:5187
 ```
 
-A prévia usa notas fictícias e não lê nenhum vault. Para gravar vídeos quadro a quadro, abra `/ui?virtual=1` e avance o tempo com `window.__step(ms)`.
+A prévia usa notas fictícias e não lê nenhum vault. Para gravar vídeos quadro a quadro, abra `/?virtual=1` e avance o tempo com `window.__step(ms)`.
 
 Estrutura: `src/brain-canvas.ts` (vista de cima, Canvas 2D), `src/brain-gl.ts` (visualizadores 3D) sobre `src/gl-engine.ts` (motor WebGL), `src/sidebar.ts` (painel), `src/vault-source.ts` (leitura do vault).
 
@@ -135,7 +135,7 @@ The interface is in Portuguese. The 3D visualizers have no on-screen note labels
 
 ```sh
 npm ci && npm run typecheck && npm test
-npm run build && npm run preview   # http://127.0.0.1:5187/ui, fictional notes
+npm run build && npm run preview   # http://127.0.0.1:5187, fictional notes
 ```
 
 ## License
