@@ -1,4 +1,4 @@
-# Reweave
+# Reweave (Fio Vivo)
 
 **Português** · [English](#english)
 
@@ -52,7 +52,7 @@ O botão direito do mouse arrastando também gira, para quem não tem clique na 
 
 1. Baixe `main.js`, `manifest.json` e `styles.css` em [Releases](../../releases/latest).
 2. Copie os três para `<seu vault>/.obsidian/plugins/reweave/`.
-3. No Obsidian, vá em *Configurações → Plugins da comunidade*, ative **Reweave** e use o ícone do cérebro ou o comando **Reweave: Abrir cérebro**.
+3. No Obsidian, vá em *Configurações → Plugins da comunidade*, ative **Reweave** e use o ícone do cérebro ou o comando **Reweave (Fio Vivo): Abrir cérebro**.
 
 **Com o BRAT**: adicione `joaoppk2/reweave` como plugin beta.
 
@@ -93,7 +93,7 @@ Estrutura: `src/brain-canvas.ts` (vista de cima, Canvas 2D), `src/brain-gl.ts` (
 
 <a id="english"></a>
 
-# Reweave (English)
+# Reweave (Fio Vivo) (English)
 
 An Obsidian plugin that turns your notes and the links between them into a **living 3D brain**: every note is a point, every link is a wire, and your Obsidian graph color groups become the brain's regions. Your vault is never modified and nothing leaves your computer.
 
@@ -124,7 +124,7 @@ Controls, in every visualizer and with the mouse only (no modifier keys): **scro
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](../../releases/latest).
 2. Copy them to `<your vault>/.obsidian/plugins/reweave/`.
-3. Enable **Reweave** under *Settings → Community plugins*, then use the brain ribbon icon or the command **Reweave: Abrir cérebro**.
+3. Enable **Reweave** under *Settings → Community plugins*, then use the brain ribbon icon or the command **Reweave (Fio Vivo): Abrir cérebro**.
 
 Or add `joaoppk2/reweave` in **BRAT**. Requires Obsidian 1.8+ on desktop; the 3D visualizers need WebGL (without it the plugin falls back to the top view). Try it in a test vault first.
 
