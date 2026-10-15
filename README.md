@@ -1,70 +1,145 @@
 # Reweave
 
-## Português
+**Português** · [English](#english)
 
-### Estado do projeto
+Plugin do Obsidian que transforma suas notas e os vínculos entre elas em um **cérebro 3D vivo**: cada nota é um ponto, cada vínculo é um fio, e o gráfico de cores do Obsidian vira as regiões do cérebro. Nada do seu vault é alterado e nada sai do seu computador.
 
-Protótipo em desenvolvimento, ainda não pronto para distribuição. A referência visual aprovada é o cérebro original da demonstração local na porta 8766, incluindo formato, fios, cores e controles. Essa referência ainda precisa ser incorporada ao plugin desta pasta. A geometria lateral da prévia 5187 não foi escolhida para a versão final.
+## Vídeos (60 fps)
 
-A interface desta pasta contém alterações parciais de barra lateral e os bundles locais podem estar desatualizados. O trabalho atual da barra ocorre na demonstração de referência, separada deste pacote. Não interpretar a prévia abaixo como a versão final aprovada.
+Gravados a partir do plugin com notas **fictícias**, a 60 quadros por segundo. Clique na imagem para assistir.
 
-Plugin Obsidian independente: notas Markdown e vínculos em um cérebro lateral 3D de fios finos e pontos luminosos. A prévia usa **somente 64 notas sintéticas**; não lê nenhum vault. Não há telemetria, serviço remoto ou preparação de arquivos.
+| | |
+| :--- | :--- |
+| [![Visão geral](docs/images/anatomico-rede.jpg)](docs/videos/reweave-visao-geral-60fps.mp4) | **[Visão geral (47 s)](docs/videos/reweave-visao-geral-60fps.mp4)**: os três visualizadores e todas as funções: animação, notas pulsando, zoom, rotação, inclinação, busca e grupos. |
+| [![Vista de cima](docs/images/vista-de-cima.jpg)](docs/videos/vista-de-cima-60fps.mp4) | **[Vista de cima (14 s)](docs/videos/vista-de-cima-60fps.mp4)** |
+| [![Anatômico (fibras)](docs/images/anatomico-fibras.jpg)](docs/videos/anatomico-fibras-60fps.mp4) | **[Anatômico (fibras) (12 s)](docs/videos/anatomico-fibras-60fps.mp4)** |
+| [![Anatômico (rede)](docs/images/anatomico-rede.jpg)](docs/videos/anatomico-rede-60fps.mp4) | **[Anatômico (rede) (13 s)](docs/videos/anatomico-rede-60fps.mp4)** |
 
-### Desenvolvimento
+## Visualizadores
 
-Node.js 22+ e npm. Dentro desta pasta:
+Escolha em **Visualizador**, no painel da direita. Os três usam as mesmas notas, vínculos e cores; dá para trocar a qualquer momento e comparar.
+
+- **Vista de cima**: o cérebro visto de cima, em Canvas 2D, com texto das notas, setas dos vínculos e as forças do gráfico do Obsidian.
+- **Anatômico (fibras)**: o cérebro de lado, em WebGL, com feixes de fibras e sinapses ilustrativas sobre as suas notas.
+- **Anatômico (rede)**: o cérebro de lado como um casulo escuro, em WebGL. As fibras só acendem quando o impulso passa: ele corre **pelos vínculos reais** entre as suas notas, atravessa de um hemisfério para o outro e acende o corpo da célula e os dendritos. Com menos de 6 vínculos usa uma rede de fundo, ilustrativa.
+
+## O que ele faz
+
+- **Regiões = grupos de cor do gráfico do Obsidian** (`graph.json`). Cada grupo vira uma região; nomes e descrições ficam nas configurações do plugin, sem mexer na regra do gráfico. Dá para criar grupos de cor próprios no painel, com a mesma sintaxe de busca.
+- **Filtros**: busca (ignora acentos), etiquetas, anexos, notas órfãs, modificadas hoje ou esta semana, e foco em uma região.
+- **Animar**: sinapses ilustrativas (não são atividade real). Notas **modificadas** pulsam por 4 segundos.
+- **Tela**: tamanho dos nódulos, grossura dos vínculos, setas, zoom e **Vista inicial**.
+- **Forças** (vista de cima): central, repulsão, vínculos e distância; um botão copia os valores do seu gráfico do Obsidian.
+- **Clique** abre a nota; o **hover** mostra a prévia do Obsidian.
+- O visualizador escolhido fica salvo.
+
+### Controles
+
+| | Vista de cima | Anatômico (fibras / rede) |
+| :--- | :--- | :--- |
+| Arrastar | mover | mover |
+| Shift + arrastar | girar | girar |
+| Roda do mouse | aproximar | **girar** |
+| Ctrl + roda (ou pinça do touchpad) | | aproximar |
+| Shift + roda | | inclinar |
+
+## Instalação
+
+**Pelo GitHub (manual)**
+
+1. Baixe `main.js`, `manifest.json` e `styles.css` em [Releases](../../releases/latest).
+2. Copie os três para `<seu vault>/.obsidian/plugins/reweave/`.
+3. No Obsidian, vá em *Configurações → Plugins da comunidade*, ative **Reweave** e use o ícone do cérebro ou o comando **Reweave: Abrir cérebro**.
+
+**Com o BRAT**: adicione `joaoppk2/reweave` como plugin beta.
+
+Requisitos: Obsidian 1.8 ou mais novo, no computador. Os visualizadores 3D precisam de WebGL; sem ele o plugin volta sozinho para a vista de cima. Para testar sem arriscar suas notas, instale primeiro num vault de teste.
+
+## Privacidade
+
+O plugin só **lê**: a lista de arquivos, os vínculos e as etiquetas que o Obsidian já indexou, e o `graph.json`. Não altera notas, não faz chamadas de rede e não tem telemetria. Só grava as próprias configurações (`data.json` do plugin).
+
+## Limites conhecidos
+
+- A interface está em português.
+- Nos visualizadores 3D não há texto das notas na tela (o hover mostra a prévia); forças e setas valem só na vista de cima.
+- Os visualizadores 3D usam brilho aditivo e mantêm o fundo escuro mesmo em temas claros.
+- Não foi testado no celular nem em vaults muito grandes.
+
+## Desenvolvimento
+
+Node.js 22+ e npm.
 
 ```sh
 npm ci
 npm run typecheck
-npm test
-npm run preview
+npm test                          # compila e roda os testes
+npm run build                     # gera main.js
+npm run build && npm run preview  # prévia no navegador: http://127.0.0.1:5187/ui
 ```
 
-Abra `http://127.0.0.1:5187`. O servidor só escuta em loopback e só serve quatro arquivos conhecidos. Ctrl+C encerra. `npm run build` gera `main.js`, `preview.js` e módulos temporários de testes. `npm test` recompila antes dos testes Node. Não execute `prepare.py`; não é parte deste projeto.
+A prévia usa notas fictícias e não lê nenhum vault. Para gravar vídeos quadro a quadro, abra `/ui?virtual=1` e avance o tempo com `window.__step(ms)`.
 
-### Instalação manual futura, apenas em vault de teste
+Estrutura: `src/brain-canvas.ts` (vista de cima, Canvas 2D), `src/brain-gl.ts` (visualizadores 3D) sobre `src/gl-engine.ts` (motor WebGL), `src/sidebar.ts` (painel), `src/vault-source.ts` (leitura do vault).
 
-Nenhuma instalação é feita pelo build. Depois de revisar, copie **main.js, manifest.json e styles.css** para `.obsidian/plugins/reweave/` de um vault descartável; habilite em Plugins da comunidade e execute “Reweave: Abrir cérebro”. Não use primeiro seu vault real.
+## Licença
 
-Arrastar move; Shift + arrastar gira; roda do mouse e botões controlam zoom; Vista inicial restaura a câmera. Busca ignora acentos, região filtra pela primeira pasta e Hoje/Esta semana usam modificação local (semana começa segunda-feira). Clique numa nota na lista ou no canvas centraliza e abre modal; Abrir nota original usa a API do Obsidian. A lista é a alternativa de teclado ao canvas. O tema e as fontes seguem os tokens CSS do host; a prévia tem seu próprio botão de tema.
+[MIT](LICENSE)
 
-### Arquitetura e privacidade
+---
 
-- `src/main.ts`, `view.ts`: plugin, ItemView, eventos de vault/cache/CSS e descarte.
-- `src/vault-source.ts`: `vault.getMarkdownFiles()` e `metadataCache.resolvedLinks`, sem varrer disco externo.
-- `src/data.ts`: filtros e arestas resolvidas, removendo auto-links e duplicados.
-- `src/note-modal.ts`: leitura somente ao abrir; MarkdownRenderer do host e Component com unload. Não injeta HTML manualmente. Markdown/embeds continuam sujeitos às regras do Obsidian e aos plugins instalados; não é um sandbox de conteúdo hostil.
-- `src/geometry.ts`, `render.ts`, `ui.ts`: compartilhados pelo plugin e preview.
+<a id="english"></a>
 
-A forma é uma interpretação artística: uma superfície periódica fechada para cada parte (córtex, cerebelo e um único tronco fino), com polos colapsados e relevo suave. Não há cascas 2D espelhadas, sólido ou modelo médico. As três partes se sobrepõem nas junções; não são uma malha anatômica soldada. Posições são determinísticas por caminho/pasta; pastas são agrupadas em sete regiões estáveis por hash, podendo compartilhar região. Este protótipo usa sete cores regionais; nomes/cores/detalhes são configuráveis pelo array de regiões passado ao BrainUI (defaults em geometry.ts). Botões nomeados e lista evitam depender só da cor. São 1400 pontos determinísticos, até dois fios locais de saída por ponto e dobras discretas, sem grade dominante. Região enquadra/destaca; Ver tudo restaura. O modal salva a câmera antes do foco e restaura ao fechar, inclusive Escape. O tema nativo controla fontes e superfícies, não substitui cores regionais.
+# Reweave (English)
 
-### Validação e limites
+An Obsidian plugin that turns your notes and the links between them into a **living 3D brain**: every note is a point, every link is a wire, and your Obsidian graph color groups become the brain's regions. Your vault is never modified and nothing leaves your computer.
 
-Os testes não foram executados novamente nesta revisão documental. Não há testes automatizados de integração nativa, interface ou mobile neste pacote. O suporte mobile e a versão mínima declarados no manifest ainda precisam de validação. O plugin não implementa chamadas próprias de rede, mas embeds renderizados pelo Obsidian podem carregar recursos externos; funcionamento offline depende do conteúdo e das configurações do host.
+## Videos (60 fps)
 
-### Antes de publicar
+Recorded from the plugin with **fictional** notes at 60 frames per second: [overview (47 s)](docs/videos/reweave-visao-geral-60fps.mp4), [Top view](docs/videos/vista-de-cima-60fps.mp4), [Anatomical (fibers)](docs/videos/anatomico-fibras-60fps.mp4), [Anatomical (network)](docs/videos/anatomico-rede-60fps.mp4).
 
-Revisar os arquivos efetivamente selecionados para o commit. Não incluir vaults, notas reais, credenciais, logs, dumps, capturas ou vídeos com conteúdo pessoal. A prévia sintética pode demonstrar o protótipo, mas não comprova a integração nativa nem a aparência final. Regras do `.gitignore` não removem arquivos já rastreados. A publicação e a instalação no vault pessoal não fazem parte dos comandos de desenvolvimento.
+## Visualizers
 
-### Cobertura disponível
+Pick one under **Visualizador** (side panel). All three use the same notes, links and colors, so you can switch and compare.
 
-Há 12 testes Node definidos para verificar costuras/polos, continuidade, profundidade, largura do tronco, projeção e filtros (incluindo segunda-feira, datas futuras, busca acentuada e links ausentes). Typecheck e build disponíveis. Prévia navegável não substitui teste nativo Obsidian; este projeto **não foi instalado/testado no Obsidian**. Canvas transparente mostra fios traseiros intencionalmente; não há oclusão sólida. Desempenho de vaults enormes, embeds complexos e gestos multitoque precisa de validação no host. Não há sincronização, persistência de câmera, animação contínua nem gravação de notas.
+- **Vista de cima** (top view): the brain seen from above, drawn on a 2D canvas, with note labels, link arrows and the Obsidian graph forces.
+- **Anatômico (fibras)** (anatomical, fibers): a side view in WebGL, with fiber bundles and illustrative synapses over your notes.
+- **Anatômico (rede)** (anatomical, network): a dark side-view cocoon in WebGL. Fibers light up only while an impulse passes: it travels **along your real note links**, crosses between hemispheres and lights up the cell body and its dendrites. With fewer than 6 links it falls back to an illustrative background network.
 
-## English
+## Features
 
-### Project status
+- **Regions = Obsidian graph color groups** (`graph.json`), with names and descriptions in the plugin settings. You can also define extra color groups in the panel using the same query syntax.
+- **Filters**: accent-insensitive search, tags, attachments, orphans, modified today / this week, and region focus.
+- **Animate**: illustrative synapses (not real activity). **Modified** notes pulse for 4 seconds.
+- **Display**: node size, link width, arrows, zoom and **Vista inicial** (reset view).
+- **Forces** (top view): center, repel, link and distance, with a button that copies your Obsidian graph values.
+- **Click** opens the note; **hover** shows Obsidian's page preview. Your chosen visualizer is remembered.
 
-Development prototype, not a release-ready plugin. The approved visual reference is the original local demonstration on port 8766, including its brain shape, wires, colors, and controls. It has not yet been incorporated into this plugin. The lateral geometry shown on port 5187 was not selected for the final version.
+Controls in the 3D visualizers: drag moves, Shift+drag rotates, **mouse wheel rotates**, Ctrl+wheel (or trackpad pinch) zooms, Shift+wheel tilts.
 
-This source tree contains incomplete sidebar changes; existing local bundles may be stale. Current sidebar development takes place in the separate reference demonstration. The preview below is not the approved final product.
+## Install
 
-Independent Obsidian plugin showing local Markdown notes and resolved links as a thin-wire lateral brain. The browser preview uses synthetic fixtures only and never reads a vault. No telemetry or remote service.
+1. Download `main.js`, `manifest.json` and `styles.css` from the [latest release](../../releases/latest).
+2. Copy them to `<your vault>/.obsidian/plugins/reweave/`.
+3. Enable **Reweave** under *Settings → Community plugins*, then use the brain ribbon icon or the command **Reweave: Abrir cérebro**.
 
-Use Node.js 22+: `npm ci`, `npm run typecheck`, `npm test`, then `npm run preview`; open `http://127.0.0.1:5187`. `npm run build` creates the plugin and preview bundles. Build does not install anything. For a future disposable test vault, manually copy `main.js`, `manifest.json`, and `styles.css` into `.obsidian/plugins/reweave/`, enable it, and run “Reweave: Abrir cérebro”.
+Or add `joaoppk2/reweave` in **BRAT**. Requires Obsidian 1.8+ on desktop; the 3D visualizers need WebGL (without it the plugin falls back to the top view). Try it in a test vault first.
 
-Drag pans, Shift-drag rotates, wheel/buttons zoom, reset restores the camera. Search is accent-insensitive; regions use top-level folders; activity filters use local modification dates, with Monday as week start. Clicking a note focuses it and opens a host-rendered Markdown modal. Notes are also keyboard-accessible through the list. Host CSS tokens control colors/fonts. Vault/cache/theme events refresh the view; observers, listeners, timers, and modal components are disposed on teardown.
+## Privacy
 
-Shared geometry uses one closed periodic surface per anatomical part rather than mirrored shells. It is an artistic interpretation, not a medical model or welded manifold. Folder hashes share seven stable regions with seven regional colors (configurable through BrainUI's regions argument). The shared renderer uses 1400 deterministic points, two local outgoing curved wires per point at most, and sparse folds. Region selection frames/highlights its bounds; modal close including Escape restores the pre-focus camera. Twelve Node tests are defined for geometry, perspective, data and filters; they were not rerun during this documentation review. There are no automated native integration, UI, or mobile tests in this package. Mobile support and the minimum host version declared in the manifest remain unverified. The plugin has no custom network requests, but host-rendered Markdown embeds can load external resources; offline behavior depends on note content and host settings. Native Obsidian behavior has **not** been tested; large vault performance, complex Markdown embeds, and multitouch require host testing. Rendering is wire-only, with no solid occlusion. Markdown follows Obsidian's own security and plugin policies, not a custom hostile-content sandbox.
+The plugin is **read-only**: it reads the file list, links and tags Obsidian already indexed, plus `graph.json`. It does not edit notes, make network requests or collect telemetry. It only writes its own settings.
 
-License: MIT. No commit, push, publication, or real-vault installation is required by these commands.
+## Known limits
+
+The interface is in Portuguese. The 3D visualizers have no on-screen note labels (hover shows the preview), forces and arrows only apply to the top view, the 3D canvas stays dark in light themes, and mobile and very large vaults are untested.
+
+## Development
+
+```sh
+npm ci && npm run typecheck && npm test
+npm run build && npm run preview   # http://127.0.0.1:5187/ui, fictional notes
+```
+
+## License
+
+[MIT](LICENSE)

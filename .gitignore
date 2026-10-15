@@ -24,3 +24,5 @@ dumps/
 vault/
 vaults/
 .obsidian/
+!docs/videos/*.mp4
+!docs/images/*.jpg

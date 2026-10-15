@@ -30,7 +30,7 @@ export function compileExpression(source:string):(n:Matchable)=>boolean {
 const key=(v:unknown)=>String(v).normalize('NFC').toLowerCase();
 const values=(v:unknown):unknown[]=>Array.isArray(v)?v:v===undefined||v===null?[]:[v];
 
-// Regras dos grupos de cor do gráfico do Obsidian (graph.json), no mesmo subconjunto que a referência 8766 entendia.
+// Regras dos grupos de cor do gráfico do Obsidian (graph.json): subconjunto suportado pelo plugin.
 export function matchesGroupQuery(query:string,n:Matchable):boolean {
   return query.split(/\s+OR\s+/).some(term=>matchesTerm(term.trim(),n));
 }

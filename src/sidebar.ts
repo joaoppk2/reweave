@@ -43,7 +43,7 @@ export class BrainUI {
     updateToggle();toggle.onclick=()=>{body.hidden=!body.hidden;host.classList.toggle('reweave-collapsed',body.hidden);updateToggle();};
     const section=(name:string,open=false)=>{const d=el('details',body);d.open=open;el('summary',d,name);return el('div',d,'','reweave-section');};
     const visual=section('Visualizador',true);
-    for(const [id,text] of [['top','Vista de cima (atual)'],['anat','Anatômico'],['anat4','Anatômico 4 (grafo)']] as const){const b=el('button',visual,text);b.type='button';b.setAttribute('aria-pressed',String(id==='top'));b.onclick=()=>this.setMode(id);this.modeButtons.push([id,b]);}
+    for(const [id,text] of [['top','Vista de cima'],['fibers','Anatômico (fibras)'],['network','Anatômico (rede)']] as const){const b=el('button',visual,text);b.type='button';b.setAttribute('aria-pressed',String(id==='top'));b.onclick=()=>this.setMode(id);this.modeButtons.push([id,b]);}
     el('small',visual,'Compare os visualizadores. Forças e texto das notas valem só na vista de cima; nos 3D, a roda gira e Ctrl + roda aproxima.');
     const groups=section('Grupos');this.regions=el('div',groups,'','reweave-regions');
     el('button',groups,'Ver tudo').onclick=()=>{this.selected=-1;this.renderer.selectRegion(-1);this.refresh();};

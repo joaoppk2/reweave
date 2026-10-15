@@ -2,7 +2,7 @@ export interface Vec3 { x:number; y:number; z:number; }
 export interface MeshNode extends Vec3 { legacy:number; group:number; u:number; v:number; side:number; }
 export interface Mesh { nodes:MeshNode[]; edges:[number,number][]; folds:Vec3[][]; }
 
-// Formato aprovado do cérebro (referência da porta 8766): copiado sem mudanças, inclusive a semente.
+// Formato do cérebro visto de cima: superfície paramétrica fixa e malha determinística (semente 71).
 export function point(u:number,v:number,side:number):Vec3 {
   const sv=Math.sin(v),cv=Math.cos(v);
   const fold=1+.035*Math.sin(19*u+3*Math.sin(5*v))+.025*Math.cos(23*v+4*Math.sin(6*u));
@@ -26,7 +26,7 @@ export function makeMesh(pt:(u:number,v:number,side:number)=>Vec3=point,nU=24,nV
   for(const side of [-1,1]){
     for(let k=0;k<700;k++){
       const u=-Math.PI/2+rand()*Math.PI,v=.12+rand()*(Math.PI-.24),p=pt(u,v,side);
-      rand(); // a 8766 sorteava uma fase aqui; manter o sorteio preserva a mesma sequência de pontos
+      rand(); // sorteio descartado de propósito: manter a mesma sequência preserva as posições dos pontos
       nodes.push({...p,legacy:region(p),group:-1,u,v,side});
     }
     for(let j=0;j<nU;j++){const line:Vec3[]=[];for(let k=0;k<65;k++){const u=-Math.PI/2+k/64*Math.PI,v=.16+j/(nU-1)*(Math.PI-.32)+.045*Math.sin(u*7+j);line.push(pt(u,v,side));}folds.push(line);}

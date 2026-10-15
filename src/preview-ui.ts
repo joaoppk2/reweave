@@ -27,7 +27,24 @@ const graph:BrainGraph = { nodes, edges, directedEdges:edges, groups, graphSetti
 const host = document.getElementById('app')!;
 const settings = defaultSettings();
 const params = new URLSearchParams(location.search);
-if (params.get('mode') === 'anat' || params.get('mode') === 'anat4') settings.mode = params.get('mode') as 'anat' | 'anat4';
+if (params.get('mode') === 'fibers' || params.get('mode') === 'network') settings.mode = params.get('mode') as 'fibers' | 'network';
+// ?virtual=1: o tempo da página só avança quando window.__step(ms) é chamado, para gravar vídeos a 60 fps exatos.
+if (params.has('virtual')) {
+  let now = 0, next = 0;
+  const queue = new Map<number, FrameRequestCallback>();
+  performance.now = () => now;
+  window.requestAnimationFrame = cb => { queue.set(++next, cb); return next; };
+  window.cancelAnimationFrame = id => { queue.delete(id); };
+  (window as unknown as { __step:(ms:number)=>void }).__step = ms => { now += ms; const callbacks = [...queue.values()]; queue.clear(); for (const cb of callbacks) cb(now); };
+}
 const ui = new BrainUI(host, n => console.log('abrir', n.path), settings, () => {}, () => {});
 ui.update(graph);
 (window as unknown as { ui:BrainUI }).ui = ui;
+// Auxiliares só da prévia/gravação: legenda na tela e "edição" de notas (gera o pulso de atividade).
+const caption = document.createElement('div');
+caption.style.cssText = 'position:fixed;left:16px;top:14px;z-index:9;padding:8px 14px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff;font:600 17px system-ui,sans-serif;pointer-events:none;display:none';
+document.body.append(caption);
+(window as unknown as { demo:unknown }).demo = {
+  caption(text:string) { caption.textContent = text; caption.style.display = text ? 'block' : 'none'; },
+  touch(count:number) { const now = Date.now(); for (let i = 0; i < count; i++) graph.nodes[(i * 7 + 3) % graph.nodes.length].mtimeMs = now + i; ui.update({ ...graph, nodes:graph.nodes.map(n => ({ ...n })) }); }
+};

@@ -5,7 +5,7 @@ import { defaultForces, type ForceSettings } from './brain-forces';
 import { emptyGraph, type BrainGraph, type BrainNote } from './brain-data';
 import { compileExpression } from './expression';
 
-export type GLMode = 'anat' | 'anat4';
+export type GLMode = 'fibers' | 'network';
 export interface DisplaySettings { arrows?:boolean; labelThreshold?:number; nodeSize?:number; linkWidth?:number; }
 // O que a barra lateral precisa de qualquer renderizador (vista de cima em Canvas 2D ou os visualizadores WebGL).
 export interface Renderer {
@@ -33,10 +33,10 @@ const GAP = .07;
 const clamp = (x:number) => Math.max(0, Math.min(1, x));
 const inward = (p:Vec3, d:number):Vec3 => ({ x:p.x*d, y:p.y*d, z:(p.z-Math.sign(p.z)*GAP)*d+Math.sign(p.z)*GAP });
 const CONFIG:Record<GLMode,Config> = {
-  anat:  { pt:anatomicalPoint,  fit:a=>.66+.14*clamp((a-.6)/.6), spread:5, tail:1,   haze:0, cascade:0, cycle:14, sgain:1,    cableMode:3, yaw:-.35, pitch:.10 },
-  anat4: { pt:anatomicalPoint2, fit:a=>.66+.38*clamp((a-.6)/.6), spread:8, tail:.28, haze:1, cascade:1, cycle:22, sgain:1.35, cableMode:5, yaw:-.08, pitch:.08 }
+  fibers:  { pt:anatomicalPoint,  fit:a=>.66+.14*clamp((a-.6)/.6), spread:5, tail:1,   haze:0, cascade:0, cycle:14, sgain:1,    cableMode:3, yaw:-.35, pitch:.10 },
+  network: { pt:anatomicalPoint2, fit:a=>.66+.38*clamp((a-.6)/.6), spread:8, tail:.28, haze:1, cascade:1, cycle:22, sgain:1.35, cableMode:5, yaw:-.08, pitch:.08 }
 };
-// Opções do "Anatômico 4 (grafo)", iguais às aprovadas no laboratório.
+// Opções do visualizador "Anatômico (rede)", iguais às aprovadas no laboratório.
 const GRAPH_OPTIONS = { bundles:0, strands:7, pathPts:80, shellAlpha:1, branches:0, motes:500, moteDepth:.9, beadSteps:3, grayMix:0, signalTone:null, cells:0, fissure:false, fiberAlpha:.14, cellAlpha:.3, dotSize:2.0, graph:true, graphNodes:300, graphReach:.27 };
 const CASCADE_OPTIONS = { ...GRAPH_OPTIONS, motes:0, cascade:true, cascades:14, cycle:22, depthMin:.88, depthSpan:.06, pathBase:.3, maxHops:6, dendrites:4, dendLen:.7, bokeh:false };
 
@@ -69,7 +69,7 @@ export class BrainGL implements Renderer {
   private animation = false;
   private selected = -1;
   private chosen:string|null = null;
-  private mode:GLMode = 'anat';
+  private mode:GLMode = 'fibers';
   private cam = { yaw:-.35, pitch:.10, zoom:1, panX:0, panY:0 };
   private clock = 3.8;
   private last = 0;
@@ -296,11 +296,11 @@ export class BrainGL implements Renderer {
   private ensureScenes():void {
     const e = this.engine;
     if (!this.statics[this.mode]) {
-      this.statics[this.mode] = this.mode === 'anat'
+      this.statics[this.mode] = this.mode === 'fibers'
         ? e.build(anatomicalPoint, this.tone, GAP, true, makeMesh(anatomicalPoint))
         : e.build(anatomicalPoint2, this.tone, GAP, true, makeMesh(anatomicalPoint2, 2, 2), { ...GRAPH_OPTIONS, cascade:false });
     }
-    if (this.mode === 'anat4' && this.animation && (this.cascadeDirty || !this.cascadeLayer)) {
+    if (this.mode === 'network' && this.animation && (this.cascadeDirty || !this.cascadeLayer)) {
       e.freeScene(this.cascadeLayer);
       // Com poucos vínculos reais o disparo usa a rede de fundo (ilustrativa); com vínculos suficientes, só andam por eles.
       const index = new Map(this.visible.map((n, i) => [n.path, i] as [string, number]));
@@ -329,8 +329,8 @@ export class BrainGL implements Renderer {
     e.drawBuffer(scene.shell, 0, 0);
     if (anim) { e.drawBuffer(scene.interior, 0, 0); e.drawBuffer(scene.dust, 1, 0); }
     e.drawBuffer(scene.soma, 1, 0);
-    if (anim && this.mode === 'anat') { e.drawBuffer(scene.glow, 0, 2); e.drawBuffer(scene.cable, 1, cfg.cableMode); e.drawBuffer(scene.sparks, 1, 1); }
-    if (anim && this.mode === 'anat4' && layer) {
+    if (anim && this.mode === 'fibers') { e.drawBuffer(scene.glow, 0, 2); e.drawBuffer(scene.cable, 1, cfg.cableMode); e.drawBuffer(scene.sparks, 1, 1); }
+    if (anim && this.mode === 'network' && layer) {
       e.drawBuffer(layer.interior, 0, 0); e.drawBuffer(layer.dust, 1, 0); e.drawBuffer(layer.glow, 0, 2); e.drawBuffer(layer.cable, 1, cfg.cableMode);
       e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.burst, 1, 6); e.drawBuffer(layer.sparks, 1, 1);
     }

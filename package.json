@@ -1,1 +1,37 @@
-{"name":"reweave","version":"1.0.0","private":true,"type":"module","scripts":{"build":"node esbuild.config.mjs","typecheck":"tsc --noEmit","test":"npm run build && node --test tests/*.test.mjs","preview":"node serve.mjs"},"devDependencies":{"obsidian":"^1.8.7","esbuild":"^0.25.0","typescript":"^5.7.3","@types/node":"^22.10.0"}}
+{
+  "name": "reweave",
+  "version": "1.0.0",
+  "description": "Obsidian plugin that turns your notes and links into a living 3D brain.",
+  "license": "MIT",
+  "author": "Reweave contributors",
+  "homepage": "https://github.com/joaoppk2/reweave",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaoppk2/reweave.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joaoppk2/reweave/issues"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "graph",
+    "visualization",
+    "webgl",
+    "brain"
+  ],
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "preview": "node serve.mjs"
+  },
+  "devDependencies": {
+    "obsidian": "^1.8.7",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.0"
+  }
+}
