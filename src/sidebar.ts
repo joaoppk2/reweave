@@ -93,7 +93,7 @@ export class BrainUI {
     for(const [id,b] of this.modeButtons)b.setAttribute('aria-pressed',String(id===mode));
     this.caption.textContent='Arraste para mover · Clique com a roda e arraste para girar · Role a roda para aproximar';
     const r=this.renderer;
-    r.setColorRules(this.settings.colorRules);r.setFilter(n=>this.matches(n));r.setDisplay(this.displayState);
+    r.setColorRules(this.settings.colorRules);this.applyFilter(r);r.setDisplay(this.displayState);
     if(r.isAnimating()!==this.animating)r.toggleAnimation();
     this.showAnimation();
     if(this.graph)r.update(this.graph);
@@ -101,7 +101,10 @@ export class BrainUI {
   }
   private matches(n:BrainNote){return(n.type!=='tag'||this.tags)&&(n.type!=='attachment'||this.attachments)&&(this.orphans||this.connected.has(n.path))&&(this.selected<0||n.region===this.selected)&&normalize(n.title+' '+n.path).includes(this.query)&&(this.period==='all'||n.mtimeMs>=periodStart(this.period)&&n.mtimeMs<=Date.now());}
   update(graph:BrainGraph){this.graph=graph;this.connected=new Set(graph.edges.filter(([a,b])=>!a.startsWith('tag:')&&!b.startsWith('tag:')).flat());if(this.selected>=graph.groups.length)this.selected=-1;this.renderer.update(graph);this.regions.replaceChildren();graph.groups.forEach((r,i)=>{const b=document.createElement('button'),dot=document.createElement('i');dot.style.background=r.color||'var(--graph-node)';b.append(dot,document.createTextNode(r.name));b.setAttribute('aria-pressed',String(this.selected===i));b.onclick=()=>{this.selected=i;this.renderer.selectRegion(i);this.refresh();};this.regions.append(b);});this.refresh();}
-  private refresh(){this.renderer.setFilter(n=>this.matches(n));this.list.replaceChildren();const notes=this.graph?.nodes.filter(n=>this.matches(n))??[];this.status.textContent=`${notes.length} itens encontrados`;for(const n of notes){const b=document.createElement('button');b.textContent=n.title;b.onclick=()=>this.choose(n,()=>{});this.list.append(b);}}
+  private focusing(){return this.query!==''||this.period!=='all'||this.selected>=0;}
+  private visibleType(n:BrainNote){return(n.type!=='tag'||this.tags)&&(n.type!=='attachment'||this.attachments)&&(this.orphans||this.connected.has(n.path));}
+  private applyFilter(r:Renderer){r.setFilter(n=>this.matches(n));r.setFocus(this.focusing(),n=>this.visibleType(n));}
+  private refresh(){this.applyFilter(this.renderer);this.list.replaceChildren();const notes=this.graph?.nodes.filter(n=>this.matches(n))??[];this.status.textContent=`${notes.length} itens encontrados`;for(const n of notes){const b=document.createElement('button');b.textContent=n.title;b.onclick=()=>this.choose(n,()=>{});this.list.append(b);}}
   redraw(){this.renderer.redraw();}
   destroy(){this.top.destroy();this.gl?.destroy();this.gl=null;this.host.replaceChildren();this.host.classList.remove('reweave','reweave-collapsed');}
 }

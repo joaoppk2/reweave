@@ -11,6 +11,8 @@ export interface DisplaySettings { arrows?:boolean; labelThreshold?:number; node
 export interface Renderer {
   update(graph:BrainGraph):void;
   setFilter(predicate:(n:BrainNote)=>boolean):void;
+  // Com um filtro de busca ativo, só disparam sinapses ligadas às notas filtradas; 'context' diz quais vizinhas podem aparecer.
+  setFocus(active:boolean, context?:(n:BrainNote)=>boolean):void;
   setColorRules(rules:{expression:string;color:string}[]):void;
   selectRegion(index:number):void;
   zoom(factor:number):void;
@@ -74,6 +76,9 @@ export class BrainGL implements Renderer {
   private positions = new Map<string, Vec3>();
   private colors = new Map<string, RGB>();
   private predicate:(n:BrainNote)=>boolean = () => true;
+  private focus = false;
+  private context:(n:BrainNote)=>boolean = () => true;
+  private neighbours:Note[] = [];
   private rules:{ test:(n:BrainNote)=>boolean; color:string }[] = [];
   private baseline:Map<string, number>|null = null;
   private pulses = new Map<string, number>();
@@ -167,6 +172,7 @@ export class BrainGL implements Renderer {
     this.redraw();
   }
   setFilter(predicate:(n:BrainNote)=>boolean):void { this.predicate = predicate; this.cache(); this.redraw(); }
+  setFocus(active:boolean, context:(n:BrainNote)=>boolean = () => true):void { this.focus = active; this.context = context; this.cache(); this.redraw(); }
   setColorRules(rules:{ expression:string; color:string }[]):void {
     this.rules = [];
     for (const rule of rules) { if (!rule.expression.trim()) continue; try { this.rules.push({ test:compileExpression(rule.expression), color:rule.color }); } catch { /* regra inválida é ignorada */ } }
@@ -283,11 +289,15 @@ export class BrainGL implements Renderer {
   private rebuildReal():void {
     const e = this.engine;
     e.freeScene({ a:this.realLinks, b:this.realNodes });
-    const visible = new Set(this.visible.map(n => n.path)), links:number[] = [], nodes:number[] = [];
+    const visible = new Set(this.visible.map(n => n.path)), links:number[] = [], nodes:number[] = [], near = new Map<string, Note>();
     this.realEdges = [];
     for (const [pa, pb] of this.data.edges) {
-      if (!visible.has(pa) || !visible.has(pb)) continue;
-      const a = this.byPath.get(pa)!, b = this.byPath.get(pb)!, { path, callosal } = this.edgePath(a, b);
+      const va = visible.has(pa), vb = visible.has(pb);
+      if (this.focus ? !(va || vb) : !(va && vb)) continue;
+      const a = this.byPath.get(pa), b = this.byPath.get(pb);
+      if (!a || !b) continue;
+      if (this.focus) { const other = va ? b : a; if (!visible.has(other.path)) { if (!this.context(other)) continue; near.set(other.path, other); } }
+      const { path, callosal } = this.edgePath(a, b);
       let len = 0;
       for (let k = 1; k < path.length; k++) len += Math.hypot(path[k].x-path[k-1].x, path[k].y-path[k-1].y, path[k].z-path[k-1].z);
       this.realEdges.push({ a, b, path, len, callosal });
@@ -298,6 +308,8 @@ export class BrainGL implements Renderer {
       const pos = this.positions.get(n.path)!, color = this.colors.get(n.path)!, size = (n.path === this.chosen ? 22 : 13) * this.display.nodeSize;
       e.add(nodes, pos, color, size, 1); e.add(nodes, pos, color, size * 2.6, .16);
     }
+    this.neighbours = [...near.values()];
+    for (const n of this.neighbours) e.add(nodes, this.positions.get(n.path)!, this.colors.get(n.path)!, 6 * this.display.nodeSize, .5);
     this.realLinks = e.buffer(links, this.gl.LINES); this.realNodes = e.buffer(nodes, this.gl.POINTS);
   }
   private freeScenes():void {
@@ -313,13 +325,18 @@ export class BrainGL implements Renderer {
         ? e.build(anatomicalPoint, this.tone, GAP, true, makeMesh(anatomicalPoint))
         : e.build(anatomicalPoint2, this.tone, GAP, true, makeMesh(anatomicalPoint2, 2, 2), { ...GRAPH_OPTIONS, cascade:false });
     }
-    if (this.mode === 'network' && this.animation && (this.cascadeDirty || !this.cascadeLayer)) {
+    if ((this.mode === 'network' || this.focus) && this.animation && (this.cascadeDirty || !this.cascadeLayer)) {
       e.freeScene(this.cascadeLayer);
-      // Com poucos vínculos reais o disparo usa a rede de fundo (ilustrativa); com vínculos suficientes, só andam por eles.
-      const index = new Map(this.visible.map((n, i) => [n.path, i] as [string, number]));
+      // Sem filtro: com poucos vínculos reais o disparo usa a rede de fundo (ilustrativa); com vínculos suficientes, só andam por eles.
+      // Com filtro: só andam pelos vínculos das notas filtradas (nada ilustrativo).
+      const pool = this.focus ? [...this.visible, ...this.neighbours] : this.visible;
+      const index = new Map(pool.map((n, i) => [n.path, i] as [string, number]));
       const edges = this.realEdges.map(r => ({ i:index.get(r.a.path)!, j:index.get(r.b.path)!, path:r.path, len:r.len, callosal:r.callosal }));
       const options:any = { ...CASCADE_OPTIONS };
-      if (edges.length >= 6) options.realGraph = { nodes:this.visible.map(n => ({ pos:this.positions.get(n.path)! })), edges };
+      if (this.focus || edges.length >= 6) {
+        options.realGraph = { nodes:pool.map(n => ({ pos:this.positions.get(n.path)! })), edges };
+        if (this.focus) { options.sourceIdx = this.visible.map((_, i) => i); options.cascades = Math.min(14, Math.max(4, this.visible.length * 3)); }
+      }
       else options.ghostLines = false;
       this.cascadeLayer = e.build(anatomicalPoint2, this.tone, GAP, true, { nodes:[], edges:[], folds:[] }, options);
       this.cascadeDirty = false;
@@ -340,10 +357,10 @@ export class BrainGL implements Renderer {
     gl.uniform1f(u.spread, cfg.spread); gl.uniform1f(u.tail, cfg.tail); gl.uniform1f(u.haze, cfg.haze);
     gl.uniform1f(u.cascade, cfg.cascade); gl.uniform1f(u.cycle, cfg.cycle); gl.uniform1f(u.hops, 0); gl.uniform1f(u.sgain, cfg.sgain);
     e.drawBuffer(scene.shell, 0, 0);
-    if (anim) { e.drawBuffer(scene.interior, 0, 0); e.drawBuffer(scene.dust, 1, 0); }
+    if (anim && !this.focus) { e.drawBuffer(scene.interior, 0, 0); e.drawBuffer(scene.dust, 1, 0); }
     e.drawBuffer(scene.soma, 1, 0);
-    if (anim && this.mode === 'fibers') { e.drawBuffer(scene.glow, 0, 2); e.drawBuffer(scene.cable, 1, cfg.cableMode); e.drawBuffer(scene.sparks, 1, 1); }
-    if (anim && this.mode === 'network' && layer) {
+    if (anim && this.mode === 'fibers' && !this.focus) { e.drawBuffer(scene.glow, 0, 2); e.drawBuffer(scene.cable, 1, cfg.cableMode); e.drawBuffer(scene.sparks, 1, 1); }
+    if (anim && layer && (this.mode === 'network' || this.focus)) {
       e.drawBuffer(layer.interior, 0, 0); e.drawBuffer(layer.dust, 1, 0); e.drawBuffer(layer.glow, 0, 2); e.drawBuffer(layer.cable, 1, cfg.cableMode);
       e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.dend, 0, 2); e.drawBuffer(layer.burst, 1, 6); e.drawBuffer(layer.sparks, 1, 1);
     }

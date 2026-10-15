@@ -18,6 +18,9 @@ export class BrainCanvas {
   private byPath=new Map<string,Note>();
   private colors=new Map<string,string>();
   private predicate:(n:BrainNote)=>boolean=()=>true;
+  private focus=false;
+  private context:(n:BrainNote)=>boolean=()=>true;
+  private neighbours=new Map<string,Note>();
   private rules:{ test:(n:BrainNote)=>boolean; color:string }[]=[];
   private baseline:Map<string,number>|null=null;
   private pulses=new Map<string,number>();
@@ -90,6 +93,7 @@ export class BrainCanvas {
     this.redraw();
   }
   setFilter(predicate:(n:BrainNote)=>boolean):void {this.predicate=predicate;this.cache();this.redraw();}
+  setFocus(active:boolean,context:(n:BrainNote)=>boolean=()=>true):void {this.focus=active;this.context=context;this.cache();this.redraw();}
   setColorRules(rules:{expression:string;color:string}[]):void {
     this.rules=[];
     for(const rule of rules){if(!rule.expression.trim())continue;try{this.rules.push({test:compileExpression(rule.expression),color:rule.color});}catch{}}
@@ -160,10 +164,15 @@ export class BrainCanvas {
     }
     this.buildSignals();
   }
+  // Com filtro ativo, um vínculo vale se tocar uma nota filtrada; a outra ponta só aparece se passar nos filtros de tipo.
+  private touches(visible:Set<string>,a:string,b:string):boolean {
+    const va=visible.has(a),vb=visible.has(b);if(!va&&!vb)return false;
+    const other=this.byPath.get(va?b:a);return va&&vb||!!other&&this.context(other);
+  }
   private buildSignals():void {
     this.signals=[];this.signalStart=performance.now();
     if(!this.animation)return;
-    const visible=new Set(this.visible.map(n=>n.path)),links=this.data.edges.filter(([a,b])=>visible.has(a)&&visible.has(b));
+    const visible=new Set(this.visible.map(n=>n.path)),links=this.data.edges.filter(([a,b])=>this.focus?this.touches(visible,a,b):visible.has(a)&&visible.has(b));
     const adjacent=new Map<string,string[]>(),reached=new Map<string,number>();
     for(const [a,b] of links){if(!adjacent.has(a))adjacent.set(a,[]);if(!adjacent.has(b))adjacent.set(b,[]);adjacent.get(a)!.push(b);adjacent.get(b)!.push(a);}
     for(const root of adjacent.keys()){if(reached.has(root))continue;reached.set(root,0);const queue=[root];for(let i=0;i<queue.length;i++)for(const b of adjacent.get(queue[i])!){if(reached.has(b))continue;reached.set(b,reached.get(queue[i])!+1);queue.push(b);}}
@@ -197,18 +206,20 @@ export class BrainCanvas {
     for(const line of this.mesh.folds){c.beginPath();line.forEach((p,i)=>{const q=this.project(p);if(i)c.lineTo(q.x,q.y);else c.moveTo(q.x,q.y);});c.stroke();}
     this.mesh.edges.forEach(([i,j],n)=>{const a=ps[i],b=ps[j],group=this.mesh.nodes[i].group,active=this.selected<0||group===this.selected;
       c.globalAlpha=active?.14:.025;c.strokeStyle=this.regionColor(group);c.beginPath();c.moveTo(a.x,a.y);this.curve(a,b);c.stroke();
-      if(this.animation&&!reduced&&active&&n%4===0){const cycle=(this.time*.32+n*.618)%1;if(cycle<.3){const t=cycle/.3,q=bezierPoint(a,b,t),glow=Math.sin(t*Math.PI);c.fillStyle=this.regionColor(group);c.globalAlpha=.18*glow;this.circle(q,4);c.fill();c.globalAlpha=.85*glow;this.circle(q,1.5);c.fill();}}
+      if(this.animation&&!reduced&&active&&!this.focus&&n%4===0){const cycle=(this.time*.32+n*.618)%1;if(cycle<.3){const t=cycle/.3,q=bezierPoint(a,b,t),glow=Math.sin(t*Math.PI);c.fillStyle=this.regionColor(group);c.globalAlpha=.18*glow;this.circle(q,4);c.fill();c.globalAlpha=.85*glow;this.circle(q,1.5);c.fill();}}
     });
     ps.map((p,i)=>({...p,i})).sort((a,b)=>a.z-b.z).forEach(p=>{const n=this.mesh.nodes[p.i],active=this.selected<0||this.selected===n.group;c.globalAlpha=active?.28+(p.z+1)*.22:.055;c.fillStyle=this.regionColor(n.group);this.circle(p,active?1.2:.7);c.fill();});
     this.drawReal(ts,reduced);c.globalAlpha=1;c.shadowBlur=0;
     if(this.animation||this.pulses.size||this.layout)this.redraw();
   };
   private drawReal(now:number,reduced:boolean):void {
-    const c=this.ctx,size=this.display.nodeSize,projected=new Map(this.visible.map(n=>[n.path,this.project(n)]));
+    const c=this.ctx,size=this.display.nodeSize,projected=new Map(this.visible.map(n=>[n.path,this.project(n)])),shown=new Set(projected.keys()),near:string[]=[];
+    if(this.focus)for(const [a,b] of this.data.edges){if(!this.touches(shown,a,b))continue;for(const k of [a,b])if(!projected.has(k)){const n=this.byPath.get(k);if(n){projected.set(k,this.project(n));near.push(k);}}}
     for(const [a,b] of this.data.edges){const p=projected.get(a),q=projected.get(b);if(!p||!q)continue;c.globalAlpha=.22;c.strokeStyle=this.colors.get(a)!;c.lineWidth=.8*this.display.linkWidth;c.beginPath();c.moveTo(p.x,p.y);this.curve(p,q);c.stroke();}
     if(this.display.arrows)for(const [a,b] of this.data.directedEdges){const p=projected.get(a),q=projected.get(b);if(!p||!q)continue;const dx=q.x-p.x,dy=q.y-p.y,theta=Math.atan2(dy*.3+dx*.12,dx*.3-dy*.12),x=q.x-Math.cos(theta)*4*size,y=q.y-Math.sin(theta)*4*size;
       c.globalAlpha=.8;c.fillStyle=this.colors.get(a)!;c.beginPath();c.moveTo(x,y);c.lineTo(x-7*Math.cos(theta-.45),y-7*Math.sin(theta-.45));c.lineTo(x-7*Math.cos(theta+.45),y-7*Math.sin(theta+.45));c.closePath();c.fill();}
     for(const [path,start] of this.pulses)if(now-start>=4000)this.pulses.delete(path);
+    for(const k of near){const p=projected.get(k)!;c.globalAlpha=.5;c.fillStyle=this.colors.get(k)!;this.circle(p,2.4*size);c.fill();}
     for(const n of this.visible){const p=projected.get(n.path)!,color=this.colors.get(n.path)!;c.globalAlpha=1;c.fillStyle=color;c.shadowColor=color;c.shadowBlur=7;this.circle(p,(n.path===this.chosen?6:3.4)*size);c.fill();c.shadowBlur=0;
       if(this.camera.scale>=this.display.labelThreshold){c.font='12px Segoe UI, sans-serif';c.fillStyle=this.palette.text;c.fillText(n.title,p.x+6*size,p.y-6*size);}
       const start=this.pulses.get(n.path);if(start!==undefined){const age=(now-start)/1000;c.globalAlpha=1-age/4;c.strokeStyle=color;c.lineWidth=1;this.circle(p,(reduced?9:5+age*10)*size);c.stroke();}

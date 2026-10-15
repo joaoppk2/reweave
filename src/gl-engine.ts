@@ -213,7 +213,7 @@ void main(){float a=opacity;vec3 c=tint;if(dots<.5&&signal>1.5){c=mix(tint,vec3(
       // each target fires when the impulse arrives, and the chain fades out after a few hops.
       const adj=G.nodes.map(()=>[]);
       G.edges.forEach((e,k)=>{adj[e.i].push({to:e.j,k,fwd:true});adj[e.j].push({to:e.i,k,fwd:false});});
-      const sources=G.nodes.map((_,i)=>i).filter(i=>adj[i].length);
+      const sources=(R.sourceIdx||G.nodes.map((_,i)=>i)).filter(i=>adj[i].length);
       if(!sources.length)return;
       for(let s=0;s<R.cascades;s++){
         const t0=.6+s*((R.cycle-12.5)/Math.max(1,R.cascades-1))+random()*.3,src=sources[Math.floor(random()*sources.length)],fired=new Set([src]),queue=[{n:src,t:t0,lvl:0}];
